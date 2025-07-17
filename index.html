@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Hacker Tracker - Phone & IP</title>
+  <style>
+  body {
+    background: #000;
+    color: #00ff00;
+    font-family: 'Courier New', monospace;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding-top: 40px;
+    overflow: hidden;
+  }
+
+  /* Matrix rain background */
+  body::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: linear-gradient(transparent, rgba(0, 255, 0, 0.3));
+    animation: matrixRain 0.4s linear infinite;
+    z-index: -1;
+    opacity: 0.15;
+    pointer-events: none;
+  }
+
+  @keyframes matrixRain {
+    0% { background-position: 0 0; }
+    100% { background-position: 0 100vh; }
+  }
+
+  h1 {
+    text-shadow: 0 0 5px #0f0, 0 0 15px #0f0;
+  }
+
+  input, button {
+    background: black;
+    border: 1px solid #0f0;
+    color: #00ff00;
+    padding: 10px;
+    margin: 10px;
+    font-size: 16px;
+    box-shadow: 0 0 10px #00ff00 inset;
+    transition: all 0.3s ease-in-out;
+  }
+
+  button {
+    animation: pulse 1.5s infinite;
+  }
+
+  button:hover {
+    background-color: #00ff00;
+    color: black;
+    box-shadow: 0 0 20px #00ff00;
+    cursor: pointer;
+  }
+
+  @keyframes pulse {
+    0%   { box-shadow: 0 0 5px #00ff00; }
+    50%  { box-shadow: 0 0 20px #00ff00; }
+    100% { box-shadow: 0 0 5px #00ff00; }
+  }
+
+  .result {
+    margin-top: 20px;
+    padding: 15px;
+    width: 90%;
+    max-width: 600px;
+    background-color: #001100;
+    border: 1px solid #0f0;
+    box-shadow: 0 0 20px #00ff00;
+    white-space: pre-wrap;
+    border-radius: 10px;
+    animation: glowScan 2s infinite alternate;
+  }
+
+  @keyframes glowScan {
+    0% { box-shadow: 0 0 10px #0f0; }
+    100% { box-shadow: 0 0 25px #0f0; }
+  }
+
+  .blink::after {
+    content: '_';
+    animation: blink 1s step-start infinite;
+  }
+
+  @keyframes blink {
+    50% { opacity: 0; }
+  }
+</style>
+</head>
+<body>
+
+  <h1>🧠 Hacker Phone & IP Tracker</h1>
+  <input type="text" id="phoneInput" placeholder="> Enter phone number e.g. +919999999999" />
+  <button onclick="trace()">Trace</button>
+
+  <div class="result blink" id="phoneResult">> Awaiting command...</div>
+  <div class="result" id="ipResult">> Scanning IP...</div>
+
+  <script>
+    // Phone tracer using hardcoded rules
+    function trace() {
+      const number = document.getElementById("phoneInput").value.trim();
+      const phoneResult = document.getElementById("phoneResult");
+
+      if (!number.startsWith("+") || number.length < 8) {
+        phoneResult.textContent = "> ERROR: Please enter a valid international number.";
+        return;
+      }
+
+      const countryCodes = {
+        "+91": "India 🇮🇳",
+        "+1": "USA/Canada 🇺🇸",
+        "+44": "United Kingdom 🇬🇧",
+        "+81": "Japan 🇯🇵",
+        "+61": "Australia 🇦🇺",
+        "+49": "Germany 🇩🇪"
+      };
+
+      let country = "Unknown 🌐";
+      for (let code in countryCodes) {
+        if (number.startsWith(code)) {
+          country = countryCodes[code];
+          break;
+        }
+      }
+
+      phoneResult.textContent =
+`> 📱 Number Trace Activated...
+> Input Number : ${number}
+> Detected Country : ${country}
+> Status : ✅ Number format valid`;
+    }
+
+    // Real IP trace using ipinfo.io (public token-free access)
+    async function fetchIP() {
+      const ipResult = document.getElementById("ipResult");
+
+      try {
+        const response = await fetch("https://ipinfo.io/json?token=1d3f77a0c672ee"); // public demo token
+        const data = await response.json();
+
+        ipResult.textContent =
+`> 🌐 Network Trace Started...
+> Public IP : ${data.ip}
+> City      : ${data.city}
+> Region    : ${data.region}
+> Country   : ${data.country}
+> Location  : ${data.loc}
+> ISP       : ${data.org}
+> Status    : ✅ Trace complete`;
+      } catch (err) {
+        ipResult.textContent = "> ERROR: IP trace failed.";
+      }
+    }
+
+    fetchIP(); // Load on startup
+  </script>
+
+</body>
+</html>
